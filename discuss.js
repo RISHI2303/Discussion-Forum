@@ -126,3 +126,13 @@ function showDetails() {
     commentContainerNode.style.display = "block";
 }
 
+function addQuestionToRight(question) {
+	let titleNode = document.createElement("h3");
+	titleNode.innerHTML = question.title;
+
+	let descriptionNode = document.createElement("p");
+	descriptionNode.innerHTML = question.description;
+
+	questionDetailContainerNode.appendChild(titleNode);
+	questionDetailContainerNode.appendChild(descriptionNode);
+}
