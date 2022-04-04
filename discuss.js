@@ -1,6 +1,7 @@
 let submitQuestionNode = document.getElementById('submitBtn');
 let questionTitleNode = document.getElementById('subject');
 let questionDescriptionNode = document.getElementById('question');
+let allQuestionsListNode = document.getElementById('dataList');
 
 // listen for submit button to create a new question
 
@@ -15,7 +16,14 @@ function onQuestionSubmit() {
         }
     }
     saveQuestion(question);
-    addQuestionToPanel();
+    addQuestionToPanel(question);
+    clearQuestionForm();
+}
+
+// clear question form
+function clearQuestionForm() {
+    questionTitleNode.value = '';
+    questionDescriptionNode.value = '';
 }
 
 // save question to storage
@@ -39,8 +47,18 @@ function saveQuestion(question) {
 
 // append question to the left panel
 
-function addQuestionToPanel() {
+function addQuestionToPanel(question) {
+    let questionContainer = document.createElement('div');
 
+    let newQuestionTitleNode = document.createElement('h4');
+    newQuestionTitleNode.innerHTML = question.title;
+    questionContainer.appendChild(newQuestionTitleNode);
+
+    let newQuestionDescriptionNode = document.createElement('p');
+    newQuestionDescriptionNode.innerHTML = question.description;
+    questionContainer.appendChild(newQuestionDescriptionNode);
+
+    allQuestionsListNode.appendChild(questionContainer);
 }
 
 // listen for click on question and display in right panel
