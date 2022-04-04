@@ -7,18 +7,34 @@ let questionDescriptionNode = document.getElementById('question');
 submitQuestionNode.addEventListener('click', onQuestionSubmit);
 
 function onQuestionSubmit() {
-    let question = {
-        title: "",
-        description: ""
+    let question;
+    if (questionTitleNode.value != null || questionDescriptionNode.value != null) {
+        question = {
+            title: questionTitleNode.value,
+            description: questionDescriptionNode.value
+        }
     }
-    saveQuestion();
+    saveQuestion(question);
     addQuestionToPanel();
 }
 
 // save question to storage
 
-function saveQuestion() {
+function saveQuestion(question) {
+    // get all questions from local storage first and push new question to it
+    // then save it back to local storage
 
+    let allQuestions = localStorage.getItem('questions');
+
+    if(allQuestions) {
+        allQuestions = JSON.parse(allQuestions);
+    } else {
+        allQuestions = [];
+    }
+
+    allQuestions.push(question);
+
+    localStorage.setItem('questions', JSON.stringify(allQuestions));
 }
 
 // append question to the left panel
