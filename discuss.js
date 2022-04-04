@@ -3,6 +3,17 @@ let questionTitleNode = document.getElementById('subject');
 let questionDescriptionNode = document.getElementById('question');
 let allQuestionsListNode = document.getElementById('dataList');
 
+// display all existing questions
+function onLoad() {
+    // get all functions from storage
+    let allQuestions = getAllQuestions();
+    allQuestions.forEach(function (question) { 
+        addQuestionToPanel(question);
+    });
+}
+
+onLoad();
+
 // listen for submit button to create a new question
 
 submitQuestionNode.addEventListener('click', onQuestionSubmit);
@@ -29,16 +40,10 @@ function clearQuestionForm() {
 // save question to storage
 
 function saveQuestion(question) {
-    // get all questions from local storage first and push new question to it
-    // then save it back to local storage
+    // get all questions from storage first and push new question to it
+    // then save it back to storage
 
-    let allQuestions = localStorage.getItem('questions');
-
-    if(allQuestions) {
-        allQuestions = JSON.parse(allQuestions);
-    } else {
-        allQuestions = [];
-    }
+    let allQuestions = getAllQuestions();
 
     allQuestions.push(question);
 
@@ -59,6 +64,19 @@ function addQuestionToPanel(question) {
     questionContainer.appendChild(newQuestionDescriptionNode);
 
     allQuestionsListNode.appendChild(questionContainer);
+}
+
+// get all functions from storage
+function getAllQuestions() {
+    let allQuestions = localStorage.getItem('questions');
+
+    if(allQuestions) {
+        allQuestions = JSON.parse(allQuestions);
+    } else {
+        allQuestions = [];
+    }
+
+    return allQuestions;
 }
 
 // listen for click on question and display in right panel
