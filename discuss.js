@@ -30,7 +30,8 @@ function onQuestionSubmit() {
     if (questionTitleNode.value != null || questionDescriptionNode.value != null) {
         question = {
             title: questionTitleNode.value,
-            description: questionDescriptionNode.value
+            description: questionDescriptionNode.value,
+            responses: []
         }
     }
     saveQuestion(question);
@@ -100,12 +101,17 @@ function onQuestionClick(question) {
 
         // create question details
         addQuestionToRight(question);
+
+        // listen for submit response button
+        submitCommentNode.addEventListener('click', onResponseSubmit(question));
     }
 }
 
 // listen for click on submit response button
-function onResponseSubmit() {
-
+function onResponseSubmit(question) {
+    return function () {
+        saveResponse(question);
+    }
 }
 
 // display response in response section
@@ -135,4 +141,20 @@ function addQuestionToRight(question) {
 
 	questionDetailContainerNode.appendChild(titleNode);
 	questionDetailContainerNode.appendChild(descriptionNode);
+}
+
+function saveResponse(updatedQuestion) {
+    let allQuestions = getAllQuestions();
+
+    let revisedQuestion = allQuestions.map(function (question) { 
+        if (updatedQuestion.title === question.title) {
+            question.responses.push({
+                name: commentatorNameNode.value,
+                description: commentNode.value
+            });
+        }
+        return question;
+    });
+
+    localStorage.setItem('questions', JSON.stringify(revisedQuestion));
 }
