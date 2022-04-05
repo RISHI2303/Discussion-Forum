@@ -98,12 +98,18 @@ function onQuestionClick(question) {
 
         // clear last details
         clearQuestionDetails();
+        clearResponsePanel();
 
         // show clicked question
         showDetails();
 
         // create question details
         addQuestionToRight(question);
+
+        // show all previous responses
+        question.responses.forEach(function (response) { 
+            addResponseInPanel(response);
+        });
 
         // listen for submit response button
         submitCommentNode.addEventListener('click', onResponseSubmit(question));
@@ -113,13 +119,28 @@ function onQuestionClick(question) {
 // listen for click on submit response button
 function onResponseSubmit(question) {
     return function () {
-        saveResponse(question);
+        let response = {
+            name: commentatorNameNode.value,
+            description: commentNode.value
+        }
+        saveResponse(question, response);
+        addResponseInPanel(response);
     }
 }
 
 // display response in response section
-function addResponseInPanel() {
+function addResponseInPanel(response) {
+    let userNameNode = document.createElement("h4");
+    userNameNode.innerHTML = response.name;
 
+    let userCommentNode = document.createElement("p");
+    userCommentNode.innerHTML = response.description;
+
+    let responseContainer = document.createElement("div");
+    responseContainer.appendChild(userNameNode);
+    responseContainer.appendChild(userCommentNode);
+
+    responseContainerNode.appendChild(responseContainer);
 }
 
 // hide question panel
@@ -146,7 +167,7 @@ function addQuestionToRight(question) {
 	questionDetailContainerNode.appendChild(descriptionNode);
 }
 
-function saveResponse(updatedQuestion) {
+function saveResponse(updatedQuestion, response) {
     if (commentatorNameNode.value == "" || commentNode.value == "") {
         alert("Name and comment cannot be empty");
     }
@@ -156,10 +177,7 @@ function saveResponse(updatedQuestion) {
 
         let revisedQuestion = allQuestions.map(function (question) {
             if (updatedQuestion.title === question.title) {
-                question.responses.push({
-                    name: commentatorNameNode.value,
-                    description: commentNode.value
-                });
+                question.responses.push(response);
             }
             return question;
         });
@@ -170,4 +188,8 @@ function saveResponse(updatedQuestion) {
 
 function clearQuestionDetails() {
     questionDetailContainerNode.innerHTML = "";
+}
+
+function clearResponsePanel() {
+    responseContainerNode.innerHTML = "";
 }
