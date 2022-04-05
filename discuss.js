@@ -11,6 +11,50 @@ let commentContainerNode = document.getElementById("commentHolder");
 let commentatorNameNode = document.getElementById("pickName");
 let commentNode = document.getElementById("pickComment");
 let submitCommentNode = document.getElementById("commentBtn");
+var questionSearchNode = document.getElementById("questionSearch");
+
+// listen to value change in search bar
+questionSearchNode.addEventListener('keyup', function (event) { 
+    // show filtered result
+    filterResult(event.target.value);
+});
+ 
+// filter result
+function filterResult(query) { 
+    var allQuestions = getAllQuestions();
+
+    if (query) {
+        clearQuestionPanel();
+
+        var filteredQuestions = allQuestions.filter(function (question) { 
+            if(question.title.includes(query)) {
+                return true;
+            }
+        });
+
+        if(filteredQuestions.length > 0) {
+            filteredQuestions.forEach(function (question) { 
+                addQuestionToPanel(question);
+            });
+        }
+
+        else {
+            printNoMatchFound();
+        }
+    }
+
+    else {
+        clearQuestionPanel();
+        allQuestions.forEach(function (question) { 
+            addQuestionToPanel(question);
+        });
+    }
+}
+
+// clear all questions from panel
+function clearQuestionPanel() { 
+    allQuestionsListNode.innerHTML = "";
+}
 
 // display all existing questions
 function onLoad() {
@@ -193,4 +237,11 @@ function clearQuestionDetails() {
 
 function clearResponsePanel() {
     responseContainerNode.innerHTML = "";
+}
+
+function printNoMatchFound() {
+    let noMatchFoundNode = document.createElement("h1");
+    noMatchFoundNode.innerHTML = "No match found :(";
+
+    allQuestionsListNode.appendChild(noMatchFoundNode);
 }
