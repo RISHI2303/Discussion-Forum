@@ -5,7 +5,7 @@ let allQuestionsListNode = document.getElementById('dataList');
 let createQuestionNode = document.getElementById("toggleDisplay");
 let questionDetailContainerNode = document.getElementById("respondQue");
 let resolveQuestionContainerNode = document.getElementById("resolveHolder");
-let resolveQuestion = document.getElementById("resolveQuestion");
+let resolveQuestionNode = document.getElementById("resolveQuestion");
 let responseContainerNode = document.getElementById("respondAns");
 let commentContainerNode = document.getElementById("commentHolder");
 let commentatorNameNode = document.getElementById("pickName");
@@ -134,7 +134,7 @@ function addQuestionToPanel(question) {
 
 // get all functions from storage
 function getAllQuestions() {
-    let allQuestions = localStorage.getItem('questions');
+    var allQuestions = localStorage.getItem('questions');
 
     if(allQuestions) {
         allQuestions = JSON.parse(allQuestions);
@@ -172,9 +172,39 @@ function onQuestionClick(question) {
         // submitCommentNode.addEventListener('click', onResponseSubmit(question), {once: true});
         submitCommentNode.onclick = onResponseSubmit(question);
 
+        // listen for upvote button
         upvote.onclick = upvoteQuestion(question);
+
+        // listen for downvote button
         downvote.onclick = downvoteQuestion(question);
+
+        // listen for resolve button
+        resolveQuestionNode.onclick = resolveQuestion(question);
     }
+}
+
+// resolve question
+function resolveQuestion(question) {
+    return function () {
+        hideDetails();
+        showQuestionPanel();
+        deleteQuestion(question);
+        clearQuestionPanel();
+        onLoad();
+    }
+}
+
+function deleteQuestion(selectedQuestion) { 
+    var allQuestions = getAllQuestions();
+
+    for (var i = 0; i < allQuestions.length; i++) {
+        if (allQuestions[i].title == selectedQuestion.title) {
+            allQuestions.splice(i, 1);
+            break;
+        }
+    }
+
+    localStorage.setItem('questions', JSON.stringify(allQuestions));
 }
 
 // upvotes
@@ -228,11 +258,24 @@ function hideQuestionPanel() {
 }
 
 // show question panel
+function showQuestionPanel() {
+    createQuestionNode.style.display = "block";
+}
+
+// show question panel
 function showDetails() {
     questionDetailContainerNode.style.display = "block";
     resolveQuestionContainerNode.style.display = "block";
     responseContainerNode.style.display = "block";
     commentContainerNode.style.display = "block";
+}
+
+// hide question details
+function hideDetails() { 
+    questionDetailContainerNode.style.display = "none";
+    resolveQuestionContainerNode.style.display = "none";
+    responseContainerNode.style.display = "none";
+    commentContainerNode.style.display = "none";
 }
 
 function addQuestionToRight(question) {
