@@ -12,6 +12,8 @@ let commentatorNameNode = document.getElementById("pickName");
 let commentNode = document.getElementById("pickComment");
 let submitCommentNode = document.getElementById("commentBtn");
 var questionSearchNode = document.getElementById("questionSearch");
+var upvote = document.getElementById("upvote");
+var downvote = document.getElementById("downvote");
 
 // listen to value change in search bar
 questionSearchNode.addEventListener('keyup', function (event) { 
@@ -75,7 +77,9 @@ function onQuestionSubmit() {
         question = {
             title: questionTitleNode.value,
             description: questionDescriptionNode.value,
-            responses: []
+            responses: [],
+            upvotes: 0,
+            downvotes: 0
         }
     }
     saveQuestion(question);
@@ -104,6 +108,7 @@ function saveQuestion(question) {
 // append question to the left panel
 function addQuestionToPanel(question) {
     let questionContainer = document.createElement('div');
+    questionContainer.setAttribute('id', question.title);
     questionContainer.style.background = "grey";
 
     let newQuestionTitleNode = document.createElement('h4');
@@ -113,6 +118,14 @@ function addQuestionToPanel(question) {
     let newQuestionDescriptionNode = document.createElement('p');
     newQuestionDescriptionNode.innerHTML = question.description;
     questionContainer.appendChild(newQuestionDescriptionNode);
+
+    var upvoteTextNode = document.createElement('h4');
+    upvoteTextNode.innerHTML = "Upvotes: " + question.upvotes;
+    questionContainer.appendChild(upvoteTextNode);
+
+    var downvoteTextNode = document.createElement('h4');
+    downvoteTextNode.innerHTML = "Downvotes: " + question.downvotes;
+    questionContainer.appendChild(downvoteTextNode);
 
     allQuestionsListNode.appendChild(questionContainer);
 
@@ -158,6 +171,27 @@ function onQuestionClick(question) {
         // listen for submit response button
         // submitCommentNode.addEventListener('click', onResponseSubmit(question), {once: true});
         submitCommentNode.onclick = onResponseSubmit(question);
+
+        upvote.onclick = upvoteQuestion(question);
+        downvote.onclick = downvoteQuestion(question);
+    }
+}
+
+// upvotes
+function upvoteQuestion(question) { 
+    return function () { 
+        question.upvotes++;
+        updateQuestion(question);
+        updateQuestionUI(question);
+    }
+}
+
+// downvotes
+function downvoteQuestion(question) { 
+    return function () { 
+        question.downvotes++;
+        updateQuestion(question);
+        updateQuestionUI(question);
     }
 }
 
@@ -244,4 +278,26 @@ function printNoMatchFound() {
     noMatchFoundNode.innerHTML = "No match found :(";
 
     allQuestionsListNode.appendChild(noMatchFoundNode);
+}
+
+// update question
+function updateQuestion(updatedQuestion) { 
+    var allQuestions = getAllQuestions();
+
+    var revisedQuestion = allQuestions.map(function (question) {
+        if (updatedQuestion.title === question.title) {
+            return updatedQuestion;
+        }
+        return question;
+    });
+
+    localStorage.setItem('questions', JSON.stringify(revisedQuestion));
+}
+
+function updateQuestionUI(question) {
+    var questionContainerNode = document.getElementById(question.title);
+
+    questionContainerNode.childNodes[2].innerHTML = "Upvotes: " + question.upvotes;
+    questionContainerNode.childNodes[3].innerHTML = "Downvotes: " + question.downvotes;
+    // console.log(questionContainerNode.childNodes);
 }
