@@ -96,6 +96,9 @@ function onQuestionClick(question) {
         // hide question panel
         hideQuestionPanel();
 
+        // clear last details
+        clearQuestionDetails();
+
         // show clicked question
         showDetails();
 
@@ -163,4 +166,8 @@ function saveResponse(updatedQuestion) {
 
         localStorage.setItem('questions', JSON.stringify(revisedQuestion));
     }
+}
+
+function clearQuestionDetails() {
+    questionDetailContainerNode.innerHTML = "";
 }
