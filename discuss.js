@@ -72,7 +72,7 @@ function addQuestionToPanel(question) {
 
     allQuestionsListNode.appendChild(questionContainer);
 
-    questionContainer.addEventListener('click', onQuestionClick(question));
+    questionContainer.onclick = onQuestionClick(question);
 }
 
 // get all functions from storage
@@ -112,7 +112,8 @@ function onQuestionClick(question) {
         });
 
         // listen for submit response button
-        submitCommentNode.addEventListener('click', onResponseSubmit(question));
+        // submitCommentNode.addEventListener('click', onResponseSubmit(question), {once: true});
+        submitCommentNode.onclick = onResponseSubmit(question);
     }
 }
 
