@@ -144,17 +144,23 @@ function addQuestionToRight(question) {
 }
 
 function saveResponse(updatedQuestion) {
-    let allQuestions = getAllQuestions();
+    if (commentatorNameNode.value == "" || commentNode.value == "") {
+        alert("Name and comment cannot be empty");
+    }
+    
+    else {
+        let allQuestions = getAllQuestions();
 
-    let revisedQuestion = allQuestions.map(function (question) { 
-        if (updatedQuestion.title === question.title) {
-            question.responses.push({
-                name: commentatorNameNode.value,
-                description: commentNode.value
-            });
-        }
-        return question;
-    });
+        let revisedQuestion = allQuestions.map(function (question) {
+            if (updatedQuestion.title === question.title) {
+                question.responses.push({
+                    name: commentatorNameNode.value,
+                    description: commentNode.value
+                });
+            }
+            return question;
+        });
 
-    localStorage.setItem('questions', JSON.stringify(revisedQuestion));
+        localStorage.setItem('questions', JSON.stringify(revisedQuestion));
+    }
 }
