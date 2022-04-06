@@ -62,6 +62,14 @@ function clearQuestionPanel() {
 function onLoad() {
     // get all functions from storage
     let allQuestions = getAllQuestions();
+
+    allQuestions = allQuestions.sort(function (currentQ, nextQ) { 
+        if (currentQ.isFav)
+            return -1;
+        else
+            return 1;
+    });
+
     allQuestions.forEach(function (question) { 
         addQuestionToPanel(question);
     });
@@ -80,7 +88,8 @@ function onQuestionSubmit() {
             responses: [],
             upvotes: 0,
             downvotes: 0,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            isFav: false
         }
     }
     saveQuestion(question);
@@ -140,9 +149,31 @@ function addQuestionToPanel(question) {
         createAtNode.innerHTML = convertDateToCreatedAtTime(question.createdAt);
     })
 
+    var addToFavNode = document.createElement('i');
+    addToFavNode.setAttribute("class", "fa-regular fa-star");
+
+    if (question.isFav) {
+		addToFavNode.setAttribute("class", "fa-solid fa-star");
+	} else {
+		addToFavNode.setAttribute("class", "fa-regular fa-star");
+    }
+    
+    questionContainer.appendChild(addToFavNode);
+
+    addToFavNode.addEventListener('click', toggleFavQuestion(question));
+
     allQuestionsListNode.appendChild(questionContainer);
 
     questionContainer.onclick = onQuestionClick(question);
+}
+
+function toggleFavQuestion(question) { 
+    return function () {
+        question.isFav = !question.isFav;
+        updateQuestion(question);
+        clearQuestionPanel();
+        onLoad();
+    }
 }
 
 // get all functions from storage
