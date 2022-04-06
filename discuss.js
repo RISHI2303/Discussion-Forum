@@ -168,7 +168,8 @@ function addQuestionToPanel(question) {
 }
 
 function toggleFavQuestion(question) { 
-    return function () {
+    return function (event) {
+        event.stopPropagation(); // prevent event bubbling
         question.isFav = !question.isFav;
         updateQuestion(question);
         clearQuestionPanel();
