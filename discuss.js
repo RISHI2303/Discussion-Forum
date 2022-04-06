@@ -79,7 +79,8 @@ function onQuestionSubmit() {
             description: questionDescriptionNode.value,
             responses: [],
             upvotes: 0,
-            downvotes: 0
+            downvotes: 0,
+            createdAt: Date.now()
         }
     }
     saveQuestion(question);
@@ -119,13 +120,25 @@ function addQuestionToPanel(question) {
     newQuestionDescriptionNode.innerHTML = question.description;
     questionContainer.appendChild(newQuestionDescriptionNode);
 
-    var upvoteTextNode = document.createElement('h4');
+    var upvoteTextNode = document.createElement('p');
     upvoteTextNode.innerHTML = "Upvotes: " + question.upvotes;
     questionContainer.appendChild(upvoteTextNode);
 
-    var downvoteTextNode = document.createElement('h4');
+    var downvoteTextNode = document.createElement('p');
     downvoteTextNode.innerHTML = "Downvotes: " + question.downvotes;
     questionContainer.appendChild(downvoteTextNode);
+
+    // var creationDateAndTimeNode = document.createElement('p');
+    // creationDateAndTimeNode.innerHTML = new Date(question.createdAt).toLocaleString();
+    // questionContainer.appendChild(creationDateAndTimeNode);
+
+    var createAtNode = document.createElement('p');
+    createAtNode.innerHTML = convertDateToCreatedAtTime(question.createdAt);
+    questionContainer.appendChild(createAtNode);
+
+    setInterval(function () {
+        createAtNode.innerHTML = convertDateToCreatedAtTime(question.createdAt);
+    })
 
     allQuestionsListNode.appendChild(questionContainer);
 
@@ -234,6 +247,8 @@ function onResponseSubmit(question) {
         }
         saveResponse(question, response);
         addResponseInPanel(response);
+        commentatorNameNode.value = '';
+        commentNode.value = '';
     }
 }
 
@@ -343,4 +358,24 @@ function updateQuestionUI(question) {
     questionContainerNode.childNodes[2].innerHTML = "Upvotes: " + question.upvotes;
     questionContainerNode.childNodes[3].innerHTML = "Downvotes: " + question.downvotes;
     // console.log(questionContainerNode.childNodes);
+}
+
+// convert date to hours ago like format
+function convertDateToCreatedAtTime(date) {
+    var currentTime = Date.now();
+    var timeLapsed = currentTime - new Date(date).getTime();
+
+    var secondsDiff = parseInt(timeLapsed / 1000);
+    var minutesDiff = parseInt(secondsDiff / 60);
+    var hoursDiff = parseInt(minutesDiff / 60);
+    
+    if (minutesDiff == 0 && hoursDiff == 0)
+        return secondsDiff + " seconds ago";
+    
+    else if (hoursDiff == 0)
+        return minutesDiff + " minutes ago";
+
+
+    else 
+        return hoursDiff + " hours ago";
 }
