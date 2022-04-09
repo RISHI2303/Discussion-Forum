@@ -14,6 +14,12 @@ let submitCommentNode = document.getElementById("commentBtn");
 var questionSearchNode = document.getElementById("questionSearch");
 var upvote = document.getElementById("upvote");
 var downvote = document.getElementById("downvote");
+var newQuestionNode = document.getElementById("newQuestionForm");
+
+newQuestionNode.onclick = function () {
+    hideDetails();
+    showQuestionPanel();
+}
 
 // listen to value change in search bar
 questionSearchNode.addEventListener('keyup', function (event) { 
