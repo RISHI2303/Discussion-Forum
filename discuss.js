@@ -29,34 +29,30 @@ questionSearchNode.addEventListener('keyup', function (event) {
  
 // filter result
 function filterResult(query) { 
-    var allQuestions = getAllQuestions();
+    getAllQuestions(function (allQuestions) { 
+        if (query) {
+			clearQuestionPanel();
 
-    if (query) {
-        clearQuestionPanel();
+			var filteredQuestions = allQuestions.filter(function (question) {
+				if (question.title.includes(query)) {
+					return true;
+				}
+			});
 
-        var filteredQuestions = allQuestions.filter(function (question) { 
-            if(question.title.includes(query)) {
-                return true;
-            }
-        });
-
-        if(filteredQuestions.length > 0) {
-            filteredQuestions.forEach(function (question) { 
-                addQuestionToPanel(question);
-            });
-        }
-
-        else {
-            printNoMatchFound();
-        }
-    }
-
-    else {
-        clearQuestionPanel();
-        allQuestions.forEach(function (question) { 
-            addQuestionToPanel(question);
-        });
-    }
+			if (filteredQuestions.length > 0) {
+				filteredQuestions.forEach(function (question) {
+					addQuestionToPanel(question);
+				});
+			} else {
+				printNoMatchFound();
+			}
+		} else {
+			clearQuestionPanel();
+			allQuestions.forEach(function (question) {
+				addQuestionToPanel(question);
+			});
+		}
+    });
 }
 
 // clear all questions from panel
@@ -67,17 +63,15 @@ function clearQuestionPanel() {
 // display all existing questions
 function onLoad() {
     // get all functions from storage
-    let allQuestions = getAllQuestions();
+    getAllQuestions(function (allQuestions) { 
+        allQuestions = allQuestions.sort(function (currentQ, nextQ) {
+			if (currentQ.isFav) return -1;
+			else return 1;
+		});
 
-    allQuestions = allQuestions.sort(function (currentQ, nextQ) { 
-        if (currentQ.isFav)
-            return -1;
-        else
-            return 1;
-    });
-
-    allQuestions.forEach(function (question) { 
-        addQuestionToPanel(question);
+		allQuestions.forEach(function (question) {
+			addQuestionToPanel(question);
+		});
     });
 }
 
@@ -114,11 +108,28 @@ function saveQuestion(question) {
     // get all questions from storage first and push new question to it
     // then save it back to storage
 
-    let allQuestions = getAllQuestions();
+    getAllQuestions(function (allQuestions) { 
+        allQuestions.push(question);
 
-    allQuestions.push(question);
+		// localStorage.setItem('questions', JSON.stringify(allQuestions));
 
-    localStorage.setItem('questions', JSON.stringify(allQuestions));
+		saveQuestionOnServer(allQuestions);
+    });
+}
+
+function saveQuestionOnServer(allQuestions) { 
+    var body = {
+        data: JSON.stringify(allQuestions)
+    }
+
+    var request = new XMLHttpRequest();
+    request.open('POST', 'https://storage.codequotient.com/data/save');
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.send(JSON.stringify(body));
+
+    request.onload = function () {
+        console.log("data", request.responseText);
+    }
 }
 
 // append question to the left panel
@@ -184,16 +195,23 @@ function toggleFavQuestion(question) {
 }
 
 // get all functions from storage
-function getAllQuestions() {
-    var allQuestions = localStorage.getItem('questions');
+function getAllQuestions(onResponse) {
+    // var allQuestions = localStorage.getItem('questions');
 
-    if(allQuestions) {
-        allQuestions = JSON.parse(allQuestions);
-    } else {
-        allQuestions = [];
+    var request = new XMLHttpRequest();
+    request.open('GET', 'https://storage.codequotient.com/data/get');
+    request.send();
+
+    request.onload = function () { 
+        var data = JSON.parse(request.responseText);
+        allQuestions = JSON.parse(data.data);
+        if (allQuestions) {
+			onResponse(allQuestions);
+		} else {
+            allQuestions = [];
+            onResponse(allQuestions);
+		}
     }
-
-    return allQuestions;
 }
 
 // listen for click on question and display in right panel
@@ -230,32 +248,28 @@ function onQuestionClick(question) {
         downvote.onclick = downvoteQuestion(question);
 
         // listen for resolve button
-        resolveQuestionNode.onclick = resolveQuestion(question);
+        resolveQuestionNode.onclick = function () {
+            resolveQuestion();
+        }
     }
 }
 
 // resolve question
-function resolveQuestion(question) {
-    return function () {
+function resolveQuestion() {
+    getAllQuestions(function (allQuestions) {
+        console.log(questionDetailContainerNode.childNodes[0]);
+        allQuestions.forEach(function (val, index) { 
+            if (val.title == questionDetailContainerNode.childNodes[0].innerHTML) {
+                allQuestions.splice(index, 1);
+            }
+        });
+
+		saveQuestionOnServer(allQuestions);
         hideDetails();
+		clearQuestionDetails();
         showQuestionPanel();
-        deleteQuestion(question);
-        clearQuestionPanel();
-        onLoad();
-    }
-}
-
-function deleteQuestion(selectedQuestion) { 
-    var allQuestions = getAllQuestions();
-
-    for (var i = 0; i < allQuestions.length; i++) {
-        if (allQuestions[i].title == selectedQuestion.title) {
-            allQuestions.splice(i, 1);
-            break;
-        }
-    }
-
-    localStorage.setItem('questions', JSON.stringify(allQuestions));
+        location.reload(true);
+	});
 }
 
 // upvotes
@@ -348,16 +362,18 @@ function saveResponse(updatedQuestion, response) {
     }
     
     else {
-        let allQuestions = getAllQuestions();
-
-        let revisedQuestion = allQuestions.map(function (question) {
-            if (updatedQuestion.title === question.title) {
-                question.responses.push(response);
-            }
-            return question;
+        getAllQuestions(function (allQuestions) { 
+            let revisedQuestion = allQuestions.map(function (question) {
+				if (updatedQuestion.title === question.title) {
+					question.responses.push(response);
+				}
+				return question;
+            });
+            
+            saveQuestionOnServer(revisedQuestion);
         });
 
-        localStorage.setItem('questions', JSON.stringify(revisedQuestion));
+        // localStorage.setItem('questions', JSON.stringify(revisedQuestion));
     }
 }
 
@@ -378,16 +394,18 @@ function printNoMatchFound() {
 
 // update question
 function updateQuestion(updatedQuestion) { 
-    var allQuestions = getAllQuestions();
+    getAllQuestions(function (allQuestions) {
+		let revisedQuestion = allQuestions.map(function (question) {
+			if (updatedQuestion.title === question.title) {
+				return updatedQuestion;
+			}
+			return question;
+		});
 
-    var revisedQuestion = allQuestions.map(function (question) {
-        if (updatedQuestion.title === question.title) {
-            return updatedQuestion;
-        }
-        return question;
-    });
+		saveQuestionOnServer(revisedQuestion);
+	});
 
-    localStorage.setItem('questions', JSON.stringify(revisedQuestion));
+    // localStorage.setItem('questions', JSON.stringify(revisedQuestion));
 }
 
 function updateQuestionUI(question) {
